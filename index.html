@@ -165,10 +165,10 @@
   .coupon {
     background: rgba(255,255,255,0.9);
     border: 2px dashed #FF9800;
-    padding: 30px 40px;
+    padding: 20px 30px;
     border-radius: 24px;
     text-align: center;
-    margin: 30px 0;
+    margin: 15px 0;
     box-shadow: 0 20px 40px rgba(255,152,0,0.15);
     position: relative;
   }
@@ -179,9 +179,9 @@
   .coupon::before { left: -16px; border-right: 2px dashed #FF9800; }
   .coupon::after { right: -16px; border-left: 2px dashed #FF9800; }
   .coupon-code {
-    font-size: 36px; color: #FF5722; font-weight: 900; letter-spacing: 6px; margin: 15px 0;
+    font-size: 28px; color: #FF5722; font-weight: 900; letter-spacing: 6px; margin: 10px 0;
     font-family: 'Courier New', Courier, monospace;
-    background: rgba(255,87,34,0.1); padding: 10px 25px; border-radius: 12px;
+    background: rgba(255,87,34,0.1); padding: 8px 20px; border-radius: 12px;
     display: inline-block;
   }
 
@@ -248,18 +248,18 @@
 
   <!-- End Screen -->
   <div id="end-screen" class="screen hidden">
-    <h1 style="font-size: 56px; margin-bottom: 0;">游戏结束</h1>
-    <h2 style="font-size: 40px; color: #5D4037;">得分: <span id="final-score" style="color:#E91E63; font-size: 56px;">0</span></h2>
-    <h3 style="font-size: 28px; color: #8D6E63; margin-top: 0;">评级: <span id="final-rating" style="color:#FF9800;"></span></h3>
+    <h1 style="font-size: 48px; margin-bottom: 0; margin-top: 0;">游戏结束</h1>
+    <h2 style="font-size: 32px; color: #5D4037; margin-top: 10px; margin-bottom: 5px;">得分: <span id="final-score" style="color:#E91E63; font-size: 48px;">0</span></h2>
+    <h3 style="font-size: 24px; color: #8D6E63; margin-top: 0; margin-bottom: 0;">评级: <span id="final-rating" style="color:#FF9800;"></span></h3>
     <div class="coupon">
-      <div id="coupon-name" style="font-weight: bold; font-size: 20px; color: #5D4037;">粤味小馆 · 招牌点心尝鲜券</div>
+      <div id="coupon-name" style="font-weight: bold; font-size: 18px; color: #5D4037;">粤味小馆 · 招牌点心尝鲜券</div>
       <div class="coupon-code" id="coupon-code"></div>
       <div style="font-size: 14px; color: #8D6E63; font-weight: 500;">有效期30天 | 仅限堂食 | 不与其他优惠同享</div>
     </div>
     <div style="display: flex; gap: 15px;">
-      <button id="btn-copy" style="background: linear-gradient(135deg, #9C27B0, #673AB7); box-shadow: 0 10px 25px rgba(156, 39, 176, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">复制券码</button>
-      <button id="btn-poster" style="background: linear-gradient(135deg, #4CAF50, #009688); box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">保存海报</button>
-      <button id="btn-replay" style="background: linear-gradient(135deg, #2196F3, #03A9F4); box-shadow: 0 10px 25px rgba(33, 150, 243, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">再玩一次</button>
+      <button id="btn-copy" style="padding: 12px 32px; font-size: 20px; background: linear-gradient(135deg, #9C27B0, #673AB7); box-shadow: 0 10px 25px rgba(156, 39, 176, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">复制券码</button>
+      <button id="btn-poster" style="padding: 12px 32px; font-size: 20px; background: linear-gradient(135deg, #4CAF50, #009688); box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">保存海报</button>
+      <button id="btn-replay" style="padding: 12px 32px; font-size: 20px; background: linear-gradient(135deg, #2196F3, #03A9F4); box-shadow: 0 10px 25px rgba(33, 150, 243, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">再玩一次</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>点心大作战 · 2026 Next-Gen</title>
+<style>
+  /* 2026 Modern CSS Reset & Variables */
+  :root {
+    --primary: #FF9800;
+    --primary-glow: rgba(255, 152, 0, 0.6);
+    --bg-gradient: radial-gradient(circle at center, #fff3e0 0%, #ffe0b2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.8);
+  }
+  
+  body {
+    margin: 0;
+    background: var(--bg-gradient);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    user-select: none;
+    perspective: 1200px; /* For 3D Tilt Effect */
+  }
+
+  /* 3D Game Container with Glassmorphism */
+  #game-container {
+    position: relative;
+    width: 1000px;
+    height: 500px;
+    border-radius: 32px;
+    background: rgba(255, 245, 225, 0.8);
+    box-shadow: 
+      0 40px 80px rgba(255, 152, 0, 0.15),
+      inset 0 0 0 2px var(--glass-border),
+      inset 0 0 30px rgba(255, 255, 255, 0.5);
+    transform-style: preserve-3d;
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 32px;
+  }
+
+  /* Next-Gen UI Screens (Glassmorphism + Fluid Animations) */
+  .screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 245, 225, 0.3);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(1);
+  }
+  .screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.05);
+  }
+
+  h1 {
+    color: #FF9800;
+    font-size: 64px;
+    font-weight: 900;
+    text-shadow: 0 10px 30px var(--primary-glow);
+    margin-bottom: 20px;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #FF9800, #FF5722);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  h2 { color: #E65100; font-size: 32px; margin-bottom: 10px; }
+
+  /* Neumorphic / Glowing Buttons */
+  button {
+    background: linear-gradient(135deg, #FF9800, #FF5722);
+    color: #FFF;
+    border: none;
+    padding: 16px 48px;
+    font-size: 24px;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: 800;
+    box-shadow: 
+      0 10px 25px var(--primary-glow),
+      inset 0 -4px 0 rgba(0,0,0,0.15),
+      inset 0 4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  button::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    transition: 0.5s;
+  }
+  button:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 20px 35px var(--primary-glow), inset 0 -4px 0 rgba(0,0,0,0.15);
+  }
+  button:hover::after { left: 200%; }
+  button:active {
+    transform: translateY(2px) scale(0.95);
+    box-shadow: 0 5px 10px var(--primary-glow);
+  }
+
+  /* Modern HUD */
+  #hud {
+    position: absolute;
+    top: 20px; left: 20px; right: 20px;
+    height: 64px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #E65100;
+    z-index: 5;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 0 0 1px var(--glass-border);
+  }
+
+  .progress-bar {
+    width: 200px; height: 16px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 15px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFC107, #FF9800);
+    width: 100%;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+  }
+
+  /* Coupon Card */
+  .coupon {
+    background: rgba(255,255,255,0.9);
+    border: 2px dashed #FF9800;
+    padding: 30px 40px;
+    border-radius: 24px;
+    text-align: center;
+    margin: 30px 0;
+    box-shadow: 0 20px 40px rgba(255,152,0,0.15);
+    position: relative;
+  }
+  .coupon::before, .coupon::after {
+    content: ''; position: absolute; top: 50%; width: 30px; height: 30px;
+    background: rgba(255, 245, 225, 0.95); border-radius: 50%; transform: translateY(-50%);
+  }
+  .coupon::before { left: -16px; border-right: 2px dashed #FF9800; }
+  .coupon::after { right: -16px; border-left: 2px dashed #FF9800; }
+  .coupon-code {
+    font-size: 36px; color: #FF5722; font-weight: 900; letter-spacing: 6px; margin: 15px 0;
+    font-family: 'Courier New', Courier, monospace;
+    background: rgba(255,87,34,0.1); padding: 10px 25px; border-radius: 12px;
+    display: inline-block;
+  }
+
+  /* Advanced Steam Overlay */
+  #steam {
+    position: absolute; inset: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(255,255,255,0.8) 0%, transparent 60%),
+      radial-gradient(circle at 80% 50%, rgba(255,255,255,0.8) 0%, transparent 60%);
+    background-size: 200% 200%;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.5s; z-index: 2;
+    mix-blend-mode: overlay; /* 2026 Blending */
+  }
+  .fever-active { animation: steamWave 4s ease-in-out infinite, feverPulse 0.8s ease-in-out infinite; }
+  @keyframes steamWave {
+    0%, 100% { background-position: 0% 50%, 100% 50%; }
+    50% { background-position: 100% 50%, 0% 50%; }
+  }
+  @keyframes feverPulse {
+    0%, 100% { box-shadow: inset 0 0 60px #FF9800; opacity: 0.6; }
+    50% { box-shadow: inset 0 0 150px #FFC107; opacity: 1; }
+  }
+  .blink { animation: blinker 0.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; color: #F44336 !important; }
+  @keyframes blinker { 50% { opacity: 0.3; transform: scale(1.1); } }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div style="display: flex; align-items: center;">
+      ⏱️ <span id="time-val" style="margin-left:8px; width:30px; display:inline-block;">45</span>s 
+      <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+    </div>
+    <div>🏆 <span id="score-val">0</span></div>
+    <div>🔥 Combo: <span id="combo-val">0/5</span></div>
+  </div>
+
+  <!-- Canvas -->
+  <canvas id="game-canvas" width="1000" height="500"></canvas>
+  <div id="steam"></div>
+
+  <!-- Start Screen -->
+  <div id="start-screen" class="screen">
+    <h1>🥟 点心大作战</h1>
+    <p style="font-size: 24px; color: #8D6E63; font-weight: bold; margin-bottom: 40px;">2026 Next-Gen Edition</p>
+    <button id="btn-start">开跑蒸点心</button>
+  </div>
+
+  <!-- Tutorial Modal -->
+  <div id="tutorial-modal" class="screen hidden">
+    <h2>玩法说明</h2>
+    <div style="font-size: 20px; color: #5D4037; line-height: 1.8; margin-bottom: 30px; font-weight: 600;">
+      <p>⌨️ 使用 <b>↑ / ↓</b> 或 <b>W / S</b> 移动角色</p>
+      <p>🥟 收集普通点心 <b style="color:#FF9800">+10分</b></p>
+      <p>🥠 收集招牌点心 <b style="color:#FFC107">+20分</b></p>
+      <p>💥 避开黑炭 <b style="color:#F44336">-5秒</b></p>
+      <p>🔥 连续5个点心进入 <b>狂欢时刻！</b></p>
+    </div>
+    <button id="btn-play">开始游戏</button>
+  </div>
+
+  <!-- End Screen -->
+  <div id="end-screen" class="screen hidden">
+    <h1 style="font-size: 56px; margin-bottom: 0;">游戏结束</h1>
+    <h2 style="font-size: 40px; color: #5D4037;">得分: <span id="final-score" style="color:#E91E63; font-size: 56px;">0</span></h2>
+    <h3 style="font-size: 28px; color: #8D6E63; margin-top: 0;">评级: <span id="final-rating" style="color:#FF9800;"></span></h3>
+    <div class="coupon">
+      <div id="coupon-name" style="font-weight: bold; font-size: 20px; color: #5D4037;">粤味小馆 · 招牌点心尝鲜券</div>
+      <div class="coupon-code" id="coupon-code"></div>
+      <div style="font-size: 14px; color: #8D6E63; font-weight: 500;">有效期30天 | 仅限堂食 | 不与其他优惠同享</div>
+    </div>
+    <div style="display: flex; gap: 15px;">
+      <button id="btn-copy" style="background: linear-gradient(135deg, #9C27B0, #673AB7); box-shadow: 0 10px 25px rgba(156, 39, 176, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">复制券码</button>
+      <button id="btn-poster" style="background: linear-gradient(135deg, #4CAF50, #009688); box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">保存海报</button>
+      <button id="btn-replay" style="background: linear-gradient(135deg, #2196F3, #03A9F4); box-shadow: 0 10px 25px rgba(33, 150, 243, 0.4), inset 0 -4px 0 rgba(0,0,0,0.15);">再玩一次</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- 2026 Tech: 3D Mouse Parallax Tilt (Optimized) ---
+document.addEventListener('mousemove', (e) => {
+  const container = document.getElementById('game-container');
+  if (state === 'playing') {
+    container.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    return;
+  }
+  // Map mouse position to a -1 to 1 range
+  const xPos = (e.clientX / window.innerWidth) - 0.5;
+  const yPos = (e.clientY / window.innerHeight) - 0.5;
+  
+  // Subtle and natural tilt (max 12 degrees)
+  const rotateX = yPos * -24; // Mouse up -> tilt top towards viewer
+  const rotateY = xPos * 24;  // Mouse right -> tilt right side towards viewer
+  
+  container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+// --- Game Engine Setup ---
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+let state = 'start';
+let score = 0, timeLeft = 45, combo = 0, isFever = false, feverTimer = 0, gameTime = 0;
+let items = [], floatingTexts = [], particles = [];
+let lastTime = 0, spawnTimer = 0;
+let bgOffset1 = 0, bgOffset2 = 0, shakeTime = 0, hitPause = 0;
+
+// 2026 Tech: Physics-based Player (Velocity & Friction)
+const player = { 
+  x: 50, y: 220, vy: 0, 
+  w: 60, h: 60, emoji: '👨‍🍳', trail: [],
+  hasShield: false, speedTimer: 0
+};
+const keys = {};
+
+window.addEventListener('keydown', e => keys[e.key] = true);
+window.addEventListener('keyup', e => keys[e.key] = false);
+
+// --- UI Interactions ---
+document.getElementById('btn-start').onclick = () => {
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('tutorial-modal').classList.remove('hidden');
+};
+
+document.getElementById('btn-play').onclick = () => {
+  document.getElementById('tutorial-modal').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  startGame();
+};
+
+document.getElementById('btn-replay').onclick = () => {
+  document.getElementById('end-screen').classList.add('hidden');
+  startGame();
+};
+
+document.getElementById('btn-copy').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('coupon-code').innerText);
+  alert('券码已复制！');
+};
+
+document.getElementById('btn-poster').onclick = () => {
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = '点心大作战_2026海报.png';
+  a.click();
+};
+
+// --- Game Loop & Logic ---
+function startGame() {
+  state = 'playing';
+  score = 0; timeLeft = 45; combo = 0; isFever = false; gameTime = 0;
+  items = []; floatingTexts = []; particles = [];
+  player.y = 220; player.vy = 0; player.trail = [];
+  player.hasShield = false; player.speedTimer = 0;
+  lastTime = performance.now();
+  updateHUD();
+  requestAnimationFrame(loop);
+  if(window.timeInt) clearInterval(window.timeInt);
+  window.timeInt = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (state !== 'playing') return;
+  timeLeft--;
+  gameTime++;
+  if (isFever) {
+    feverTimer--;
+    if (feverTimer <= 0) {
+      isFever = false;
+      combo = 0;
+      document.getElementById('steam').style.opacity = 0;
+      document.getElementById('steam').classList.remove('fever-active');
+    }
+  }
+  updateHUD();
+  if (timeLeft <= 0) endGame();
+}
+
+function updateHUD() {
+  const timeEl = document.getElementById('time-val');
+  timeEl.innerText = timeLeft;
+  timeEl.parentElement.className = timeLeft <= 5 ? 'blink' : '';
+  
+  // 2026 Tech: Smooth Score Counter Animation (simulated via rapid updates in real app, here just set)
+  document.getElementById('score-val').innerText = score;
+  document.getElementById('combo-val').innerText = isFever ? 'MAX 🔥' : `${combo}/5`;
+  document.getElementById('progress-fill').style.width = `${(timeLeft/45)*100}%`;
+}
+
+function spawnItem(dt) {
+  let rate = 1.5 - Math.min(1.0, gameTime / 40); // Spawns faster over time
+  if (isFever) rate *= 0.5;
+  
+  spawnTimer += dt;
+  if (spawnTimer > rate) {
+    spawnTimer = 0;
+    const rand = Math.random();
+    let type, emojis, pts, size;
+    if (rand < 0.55) { type = 'normal'; emojis = ['🥟','🍤','🍡','🍢']; pts = 10; size = 45; }
+    else if (rand < 0.75) { type = 'sig'; emojis = ['🥠','🍮','🥮']; pts = 20; size = 55; }
+    else if (rand < 0.90) { type = 'obs'; emojis = ['💥','🪨']; pts = 0; size = 50; }
+    else if (rand < 0.95) { type = 'shield'; emojis = ['🛡️']; pts = 0; size = 45; }
+    else { type = 'speed'; emojis = ['⚡']; pts = 0; size = 45; }
+    
+    let speed = 300 + Math.random() * 200 + (gameTime * 5);
+    if (isFever) speed *= 1.5;
+    
+    items.push({
+      x: 1050, y: Math.random() * (500 - size),
+      w: size, h: size, type, emoji: emojis[Math.floor(Math.random()*emojis.length)], 
+      pts, speed, rotation: 0, rotSpeed: (Math.random()-0.5)*2
+    });
+  }
+}
+
+function update(dt) {
+  // 2026 Tech: Hit Pause (Game Freeze for impact)
+  if (hitPause > 0) {
+    hitPause -= dt;
+    return; // Skip update logic to freeze frame
+  }
+
+  // 2026 Tech: Responsive Velocity Physics for Player
+  if (player.speedTimer > 0) player.speedTimer -= dt;
+  const isSpeed = player.speedTimer > 0;
+  const accel = isSpeed ? 12000 : 6000;
+  const maxSpeed = isSpeed ? 1500 : 800;
+  const friction = 15;
+  
+  let isMoving = false;
+  if (keys['ArrowUp'] || keys['w'] || keys['W']) { player.vy -= accel * dt; isMoving = true; }
+  if (keys['ArrowDown'] || keys['s'] || keys['S']) { player.vy += accel * dt; isMoving = true; }
+
+  // Apply friction (stronger when not actively moving)
+  if (!isMoving) {
+    player.vy -= player.vy * friction * dt * 1.2;
+  } else {
+    player.vy -= player.vy * friction * dt * 0.4;
+  }
+
+  // Clamp max speed
+  if (player.vy > maxSpeed) player.vy = maxSpeed;
+  if (player.vy < -maxSpeed) player.vy = -maxSpeed;
+
+  player.y += player.vy * dt;
+
+  // Hard boundaries with slight bounce
+  if (player.y < 0) { player.y = 0; player.vy *= -0.3; }
+  if (player.y > 500 - player.h) { player.y = 500 - player.h; player.vy *= -0.3; }
+
+  // Trail logic
+  if (Math.abs(player.vy) > 50 || isFever || player.speedTimer > 0) {
+    player.trail.push({ x: player.x, y: player.y, life: 0.2, maxLife: 0.2 });
+  }
+  player.trail.forEach(t => t.life -= dt);
+  player.trail = player.trail.filter(t => t.life > 0);
+
+  // Items update
+  for (let i = items.length - 1; i >= 0; i--) {
+    let it = items[i];
+    it.x -= it.speed * dt;
+    it.rotation += it.rotSpeed * dt;
+    
+    // Collision
+    if (it.x < player.x + player.w - 15 && it.x + it.w - 15 > player.x &&
+        it.y < player.y + player.h - 15 && it.y + it.h - 15 > player.y) {
+      
+      if (it.type === 'obs') {
+        if (player.hasShield) {
+          player.hasShield = false;
+          floatingTexts.push({ text: '免疫!', x: player.x, y: player.y, color: '#2196F3', life: 1 });
+          createParticles(it.x, it.y, '#2196F3');
+          playSound('ding');
+        } else {
+          combo = 0;
+          timeLeft = Math.max(0, timeLeft - 5);
+          floatingTexts.push({ text: '-5s', x: player.x, y: player.y, color: '#F44336', life: 1 });
+          shakeTime = 0.3;
+          hitPause = 0.1; // Freeze frame
+          playSound('dong');
+        }
+      } else if (it.type === 'shield') {
+        player.hasShield = true;
+        floatingTexts.push({ text: '护盾!', x: player.x, y: player.y, color: '#2196F3', life: 1 });
+        createParticles(it.x, it.y, '#2196F3');
+        playSound('ding');
+      } else if (it.type === 'speed') {
+        player.speedTimer = 5;
+        floatingTexts.push({ text: '加速!', x: player.x, y: player.y, color: '#00BCD4', life: 1 });
+        createParticles(it.x, it.y, '#00BCD4');
+        playSound('ding');
+      } else {
+        let p = it.pts * (isFever ? 2 : 1);
+        score += p;
+        if (!isFever) {
+          combo++;
+          if (combo >= 5) {
+            isFever = true; feverTimer = 5;
+            document.getElementById('steam').style.opacity = 1;
+            document.getElementById('steam').classList.add('fever-active');
+            createFeverBurst();
+            shakeTime = 0.5;
+            hitPause = 0.15; // Epic freeze frame
+            playSound('fever');
+          }
+        }
+        floatingTexts.push({ text: '+'+p, x: player.x, y: player.y, color: it.type==='sig'?'#FFC107':'#FF9800', life: 1 });
+        if (it.type === 'sig' || isFever) {
+            createParticles(it.x, it.y, it.type==='sig' ? '#FFC107' : '#FF9800');
+            if(it.type==='sig') hitPause = 0.05; // Micro freeze for satisfying hit
+        }
+        playSound('ding');
+      }
+      updateHUD();
+      items.splice(i, 1);
+      continue;
+    }
+    if (it.x + it.w < -50) items.splice(i, 1);
+  }
+
+  // Effects update
+  floatingTexts.forEach(ft => { ft.y -= 100 * dt; ft.life -= dt; });
+  floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+  
+  particles.forEach(p => { 
+    p.vy += 1500 * dt; // Gravity
+    p.x += p.vx * dt; 
+    p.y += p.vy * dt; 
+    p.life -= dt; 
+  });
+  particles = particles.filter(p => p.life > 0);
+  
+  if (shakeTime > 0) shakeTime -= dt;
+  
+  spawnItem(dt);
+}
+
+function draw() {
+  ctx.save();
+  
+  // 2026 Tech: Screen Shake
+  if (shakeTime > 0) {
+    const intensity = shakeTime * 50;
+    ctx.translate((Math.random() - 0.5) * intensity, (Math.random() - 0.5) * intensity);
+  }
+  
+  ctx.clearRect(0, 0, 1000, 500);
+  
+  // 2026 Tech: Multi-layer Parallax Background
+  const dt = 0.016; // fixed dt for bg scroll to keep it smooth
+  bgOffset1 -= (isFever ? 100 : 50) * dt;
+  bgOffset2 -= (isFever ? 300 : 150) * dt;
+  if (bgOffset1 <= -200) bgOffset1 = 0;
+  if (bgOffset2 <= -200) bgOffset2 = 0;
+  
+  // Layer 0: Base
+  if (isFever) {
+    const pulse = (Math.sin(performance.now() / 100) + 1) / 2;
+    ctx.fillStyle = `rgb(255, ${224 - pulse * 40}, ${178 - pulse * 80})`;
+  } else {
+    ctx.fillStyle = '#FFE0B2';
+  }
+  ctx.fillRect(0, 0, 1000, 500);
+
+  // Layer 1: Distant pillars
+  ctx.strokeStyle = isFever ? 'rgba(255, 179, 0, 0.3)' : 'rgba(255, 204, 128, 0.5)';
+  ctx.lineWidth = 20;
+  ctx.lineCap = 'round';
+  for(let i=0; i<8; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i*200 + bgOffset1, -50);
+    ctx.lineTo(i*200 + bgOffset1 - 100, 550);
+    ctx.stroke();
+  }
+
+  // Layer 2: Foreground speed lines
+  ctx.strokeStyle = isFever ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)';
+  ctx.lineWidth = 4;
+  for(let i=0; i<10; i++) {
+    ctx.beginPath();
+    let y = (i * 73) % 500;
+    ctx.moveTo(i*200 + bgOffset2, y);
+    ctx.lineTo(i*200 + bgOffset2 + 100, y);
+    ctx.stroke();
+  }
+
+  // 2026 Tech: Post-Processing Filters for Glow
+  ctx.filter = 'drop-shadow(0px 10px 15px rgba(0,0,0,0.2))';
+
+  // Draw Trail
+  ctx.filter = 'none'; // No shadow for trail
+  player.trail.forEach(t => {
+    ctx.globalAlpha = t.life / t.maxLife * 0.5;
+    ctx.font = `${player.h}px Arial`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(player.emoji, t.x, t.y);
+  });
+  ctx.globalAlpha = 1;
+
+  // Draw Player with Squash & Stretch
+  if (player.speedTimer > 0) ctx.filter = 'drop-shadow(0px 0px 20px #00BCD4)';
+  else ctx.filter = isFever ? 'drop-shadow(0px 0px 20px #FF9800)' : 'drop-shadow(0px 10px 15px rgba(0,0,0,0.2))';
+  
+  ctx.save();
+  ctx.translate(player.x + player.w/2, player.y + player.h/2);
+  
+  // Draw Shield Aura
+  if (player.hasShield) {
+    ctx.beginPath();
+    ctx.arc(0, 0, player.w * 0.7, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(33, 150, 243, 0.8)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(33, 150, 243, 0.2)';
+    ctx.fill();
+  }
+
+  // Calculate squash/stretch based on velocity
+  let stretch = 1 + Math.abs(player.vy) * 0.0005;
+  let squash = 1 / stretch;
+  ctx.scale(squash, stretch);
+  ctx.font = `${player.h}px Arial`;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillText(player.emoji, 0, 0);
+  ctx.restore();
+
+  // Draw Items
+  items.forEach(it => {
+    if (it.type === 'obs') ctx.filter = 'drop-shadow(0px 0px 20px #F44336)';
+    else if (it.type === 'sig') ctx.filter = 'drop-shadow(0px 0px 15px #FFC107)';
+    else if (it.type === 'shield') ctx.filter = 'drop-shadow(0px 0px 15px #2196F3)';
+    else if (it.type === 'speed') ctx.filter = 'drop-shadow(0px 0px 15px #00BCD4)';
+    else ctx.filter = 'drop-shadow(0px 8px 10px rgba(0,0,0,0.15))';
+    
+    ctx.save();
+    ctx.translate(it.x + it.w/2, it.y + it.h/2);
+    ctx.rotate(it.rotation);
+    ctx.font = `${it.h}px Arial`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(it.emoji, 0, 0);
+    ctx.restore();
+  });
+
+  // Draw Particles (Physics based)
+  ctx.filter = 'none';
+  ctx.globalCompositeOperation = 'lighter'; // Additive blending for glow
+  particles.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+    ctx.beginPath(); 
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); 
+    ctx.fill();
+  });
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+
+  // Draw Floating Texts
+  floatingTexts.forEach(ft => {
+    ctx.fillStyle = ft.color;
+    ctx.font = '900 32px system-ui';
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = Math.max(0, ft.life / 1);
+    ctx.shadowColor = 'rgba(255,255,255,0.8)';
+    ctx.shadowBlur = 10;
+    ctx.fillText(ft.text, ft.x + 30, ft.y);
+    ctx.shadowBlur = 0;
+  });
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+function loop(now) {
+  if (state !== 'playing') return;
+  
+  // Calculate Delta Time (dt) for smooth frame-rate independent physics
+  let dt = (now - lastTime) / 1000;
+  if (dt > 0.1) dt = 0.1; // Cap dt to prevent huge jumps if tab is inactive
+  lastTime = now;
+
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function endGame() {
+  state = 'end';
+  clearInterval(window.timeInt);
+  document.getElementById('hud').classList.add('hidden');
+  document.getElementById('end-screen').classList.remove('hidden');
+  
+  // Animate score count up
+  let currentDisplayScore = 0;
+  const scoreInterval = setInterval(() => {
+    currentDisplayScore += Math.ceil(score / 20);
+    if (currentDisplayScore >= score) {
+      currentDisplayScore = score;
+      clearInterval(scoreInterval);
+    }
+    document.getElementById('final-score').innerText = currentDisplayScore;
+  }, 30);
+  
+  let rating, couponText;
+  const rand = Math.random();
+  if (score <= 200) {
+    rating = '吃货萌新'; couponText = '满100减20';
+  } else if (score <= 500) {
+    rating = '早茶达人'; couponText = rand < 0.8 ? '满200减50' : '满100减20';
+  } else {
+    rating = '点心宗师'; couponText = rand < 0.2 ? '满300减80' : '满200减50';
+  }
+  
+  document.getElementById('final-rating').innerText = rating;
+  document.getElementById('coupon-name').innerText = `粤味小馆 · ${couponText} 尝鲜券`;
+  document.getElementById('coupon-code').innerText = Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
+// --- 2026 Tech: Advanced Particle Systems ---
+function createParticles(x, y, color) {
+  for(let i=0; i<8; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 100 + Math.random() * 200;
+    particles.push({ 
+      x: x+30, y: y+30, 
+      vx: Math.cos(angle) * speed, 
+      vy: Math.sin(angle) * speed - 200, // Initial upward burst
+      life: 0.8, maxLife: 0.8,
+      color: color || '#FFC107',
+      size: 4 + Math.random() * 4
+    });
+  }
+}
+
+function createFeverBurst() {
+  for(let i=0; i<150; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 200 + Math.random() * 600;
+    particles.push({
+      x: 500, y: 250,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1.5 + Math.random(), maxLife: 2.5,
+      color: Math.random() > 0.5 ? '#FFC107' : '#FF5722',
+      size: 3 + Math.random() * 8
+    });
+  }
+}
+
+// --- Audio System ---
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let actx;
+function playSound(type) {
+  if (!actx) actx = new AudioContext();
+  if (actx.state === 'suspended') actx.resume();
+  const osc = actx.createOscillator(), gain = actx.createGain();
+  osc.connect(gain); gain.connect(actx.destination);
+  
+  if (type === 'ding') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, actx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1760, actx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.15, actx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.1);
+    osc.start(); osc.stop(actx.currentTime + 0.1);
+  } else if (type === 'dong') {
+    osc.type = 'square'; // Harsher sound for damage
+    osc.frequency.setValueAtTime(150, actx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, actx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.15, actx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.2);
+    osc.start(); osc.stop(actx.currentTime + 0.2);
+  } else if (type === 'fever') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(440, actx.currentTime);
+    osc.frequency.linearRampToValueAtTime(1200, actx.currentTime + 0.4);
+    gain.gain.setValueAtTime(0.2, actx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, actx.currentTime + 0.4);
+    osc.start(); osc.stop(actx.currentTime + 0.4);
+  }
+}
+</script>
+</body>
+</html>
